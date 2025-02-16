@@ -139,3 +139,187 @@ CREATE TABLE userFavorites (
 );
 ```
 
+# 音乐播放器服务器
+
+## 功能概述
+
+### 1. 基础通信功能
+- TCP Socket通信
+- 支持多客户端并发连接
+- 线程池管理客户端连接
+- 消息队列处理客户端请求
+
+### 2. 用户管理
+- 用户注册
+- 用户登录
+- 头像管理（上传/获取）
+- 用户信息存储
+
+### 3. 音乐管理
+- 音乐列表获取
+- 在线音乐播放
+- 音乐下载
+- 收藏音乐管理
+
+### 4. 聊天功能
+- 文本消息
+- 图片传输
+- 广播消息
+- 私聊功能
+
+## API 接口说明
+
+### 1. 用户相关接口
+
+#### 1.1 用户注册
+```javascript
+// 请求
+{
+    "type": REQ_REGIS,
+    "account": "username",
+    "password": "password"
+}
+
+// 响应
+{
+    "type": REQ_REGIS,
+    "result": "success/failed",
+    "reason": "错误原因（如果失败）"
+}
+```
+
+#### 1.2 用户登录
+```javascript
+// 请求
+{
+    "type": REQ_LOGIN,
+    "acccount": "username",
+    "password": "password"
+}
+
+// 响应
+{
+    "type": REQ_LOGIN,
+    "result": "success/failed",
+    "reason": "错误原因（如果失败）",
+    "user_id": "用户ID",
+    "account": "用户名",
+    "heading_image": "base64编码的头像"
+}
+```
+
+### 2. 音乐相关接口
+
+#### 2.1 获取音乐列表
+```javascript
+// 请求
+{
+    "type": REQ_SONGLIST,
+    "user_id": "用户ID"
+}
+
+// 响应
+{
+    "type": REQ_SONGLIST,
+    "songs": [
+        {
+            "id": "音乐ID",
+            "title": "标题",
+            "autor": "作者",
+            "duration": "时长",
+            "size": "文件大小",
+            "is_love": true/false
+        }
+    ]
+}
+```
+
+#### 2.2 收藏/取消收藏音乐
+```javascript
+// 请求
+{
+    "type": REQ_STORLOVEMUSIC,
+    "user_id": "用户ID",
+    "music_id": "音乐ID"
+}
+```
+
+### 3. 聊天相关接口
+
+#### 3.1 文本消息
+```javascript
+// 请求
+{
+    "type": REQ_ChatTXT,
+    "data": "消息内容",
+    "to": "接收者用户名"
+}
+```
+
+#### 3.2 图片传输
+```javascript
+// 开始传输
+{
+    "type": REQ_FILE_START,
+    "data": {
+        "filename": "文件名",
+        "total_size": "文件大小"
+    }
+}
+
+// 传输数据
+{
+    "type": REQ_FILE_DATA,
+    "data": "base64编码的图片数据块"
+}
+
+// 结束传输
+{
+    "type": REQ_FILE_END
+}
+```
+
+## 技术特性
+
+1. 线程安全
+   - 使用互斥锁保护共享资源
+   - 条件变量实现线程同步
+   - 线程池管理客户端连接
+
+2. 数据库支持
+   - MySQL数据库存储用户数据
+   - 支持 BLOB 类型存储二进制数据
+   - 预处理语句防止 SQL 注入
+
+3. 消息处理
+   - 基于消息队列的异步处理
+   - JSON 格式的消息协议
+   - 支持二进制数据的 Base64 编码传输
+
+4. 内存管理
+   - 智能指针管理动态内存
+   - RAII 原则确保资源正确释放
+
+5. 错误处理
+   - 异常处理机制
+   - 日志记录系统
+   - 优雅的错误恢复机制
+
+## 编译和运行
+
+```bash
+# 编译
+make
+
+# 运行服务器
+make run
+
+# 清理构建文件
+make clean
+```
+
+## 依赖项
+- json-c
+- mysql-client
+- pthread
+- C++11 或更高版本
